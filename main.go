@@ -88,10 +88,10 @@ func NewFile(filename string, opts ...FileConfig) (*File, error) {
 //
 // Read will return (0, io.EOF) to any call after the Reader is closed.
 //
-// Future Note: This is not set in stone, I am torn between allowing the current
-// buffer to be flushed by Read after Close() is called and its current
-// behavior. However I have taken the conservative route and currently
-// EOF all post-close writes.
+// Future Note: This is not set in stone, I am torn between allowing the
+// current buffer to be flushed by Read after Close() is called and its current
+// behavior. However I have taken the conservative route and currently EOF all
+// post-close writes.
 func (t *File) Read(b []byte) (int, error) {
 	// Don't return 0, nil
 	for t.ring.Readable == 0 && !t.closed {
@@ -119,6 +119,66 @@ func (t *File) Read(b []byte) (int, error) {
 func (t *File) Close() error {
 	t.closed = true
 	return t.file.Close()
+}
+
+// Read as much data is available in the file into the ring buffer ignoring
+// short writes (buffer is full), and EOFs (no more data to read from the disk)
+// as they are expected
+func (t *File) fill() error {
+	t.fmu.Lock()
+	_, err := io.Copy(t.ring, t.file)
+	t.fmu.Unlock()
+	switch err {
+	case nil, io.ErrShortWrite, io.EOF:
+		return nil
+	default:
+		return err
+	}
+}
+
+// Call this whenever we are going to need to reopen the `Tailer`'s file
+func (t *File) reopenFile() error {
+	t.fmu.Lock()
+	defer t.fmu.Unlock()
+
+	if t.file != nil {
+		if err := t.file.Close(); err != nil {
+			return err
+		}
+	}
+
+	var err error
+	t.file, err = os.OpenFile(t.filename, os.O_RDONLY, 0)
+	switch {
+	case os.IsNotExist(err):
+		t.file = nil
+	default:
+		return err
+	}
+
+	return nil
+}
+
+// checkForTruncate stats the filename to see if the file has shrunk and therefore been truncated
+// This isn't expected to handle IO errors, simply return True if the file has been truncated. (IO Errors may interfere with this happening)
+// It also doesn't update the current size of the file (i.e. t.fileSize)
+func (t *File) checkForTruncate() bool {
+	s, err := os.Stat(t.filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	if err != nil {
+		return false
+	}
+
+	if s.Size() < t.fileSize {
+		// File size shrunk, that is the sign for truncation
+		t.fileSize = s.Size()
+		return true
+	}
+
+	t.fileSize = s.Size()
+	return false
 }
 
 // Turn this into an example at some point XD
