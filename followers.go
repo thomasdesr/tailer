@@ -6,7 +6,7 @@ import (
 )
 
 // Read as much data is available in the file into the ring buffer
-func (t *Tailer) fill() error {
+func (t *File) fill() error {
 	t.fmu.Lock()
 	_, err := io.Copy(t.ring, t.file)
 	t.fmu.Unlock()
@@ -18,7 +18,7 @@ func (t *Tailer) fill() error {
 	}
 }
 
-func (t *Tailer) pollForChanges(d time.Duration) {
+func (t *File) pollForChanges(d time.Duration) {
 	for !t.closed {
 		if err := t.fill(); err != nil {
 			if err = t.reopenFile(); err != nil {
@@ -30,6 +30,6 @@ func (t *Tailer) pollForChanges(d time.Duration) {
 	}
 }
 
-// func (t *Tailer) notifyForChanges() {
+// func (t *File) notifyForChanges() {
 // 	// tbd
 // }

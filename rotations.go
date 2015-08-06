@@ -6,7 +6,7 @@ import (
 )
 
 // Call this whenever we are going to need to reopen the `Tailer`'s file
-func (t *Tailer) reopenFile() error {
+func (t *File) reopenFile() error {
 	t.fmu.Lock()
 	defer t.fmu.Unlock()
 
@@ -31,7 +31,7 @@ func (t *Tailer) reopenFile() error {
 // checkForTruncate stats the filename to see if the file has shrunk and therefore been truncated
 // This isn't expected to handle IO errors, simply return True if the file has been truncated. (IO Errors may interfere with this happening)
 // It also doesn't update the current size of the file (i.e. t.fileSize)
-func (t *Tailer) checkForTruncate() bool {
+func (t *File) checkForTruncate() bool {
 	s, err := os.Stat(t.filename)
 
 	if os.IsNotExist(err) {
@@ -50,7 +50,7 @@ func (t *Tailer) checkForTruncate() bool {
 }
 
 // pollForRotations hits the filesystem every `pollIntervalSlow` looking to see if the file needs to be reopened
-func (t *Tailer) pollForRotations(d time.Duration) {
+func (t *File) pollForRotations(d time.Duration) {
 	previousFile, err := t.file.Stat()
 	if err != nil {
 		t.errc <- err
@@ -82,9 +82,9 @@ func (t *Tailer) pollForRotations(d time.Duration) {
 	}
 }
 
-// func (t *Tailer) notifyForRotations()
+// func (t *File) notifyForRotations()
 
-// func (t *Tailer) handleFileEvent(ev fsnotify.Event) fileAction {
+// func (t *File) handleFileEvent(ev fsnotify.Event) fileAction {
 // 	switch {
 // 	case isOp(ev, fsnotify.Create):
 // 		// new file created with the same name

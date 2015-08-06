@@ -20,8 +20,8 @@ func TestRmTouch(t *testing.T) {
 	assert := assert.New(t)
 
 	withTempFile(t, time.Millisecond*200, func(t *testing.T, filename string, file *os.File) error {
-		follow, err := tailer.NewTailer(filename)
-		require.NoError(err, "Failed to create Tailer")
+		follow, err := tailer.NewFile(filename)
+		require.NoError(err, "Failed to create tailer.File")
 
 		want := make([]byte, 100)
 		for i := 0; i < 100; i++ {
@@ -70,8 +70,8 @@ func TestMvTouch(t *testing.T) {
 	assert := assert.New(t)
 
 	withTempFile(t, time.Millisecond*200, func(t *testing.T, filename string, file *os.File) error {
-		follow, err := tailer.NewTailer(filename)
-		require.NoError(err, "Failed to create Tailer")
+		follow, err := tailer.NewFile(filename)
+		require.NoError(err, "Failed to create tailer.File")
 
 		want := make([]byte, 100)
 		for i := 0; i < 100; i++ {
@@ -121,8 +121,8 @@ func TestTruncation(t *testing.T) {
 	assert := assert.New(t)
 
 	withTempFile(t, time.Millisecond*200, func(t *testing.T, filename string, file *os.File) error {
-		follow, err := tailer.NewTailer(filename)
-		require.NoError(err, "Failed to create Tailer")
+		follow, err := tailer.NewFile(filename)
+		require.NoError(err, "Failed to create tailer.File")
 
 		want := make([]byte, 100)
 		for i := 0; i < 100; i++ {

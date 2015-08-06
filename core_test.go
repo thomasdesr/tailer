@@ -23,11 +23,11 @@ func TestBasicImpl(t *testing.T) {
 		err  error
 	)
 	withTempFile(t, time.Millisecond*150, func(t *testing.T, filename string, file *os.File) error {
-		tail, err = tailer.NewTailer(filename)
-		require.NoError(err, "Failed to create Tailer")
+		tail, err = tailer.NewFile(filename)
+		require.NoError(err, "Failed to create tailer.File")
 
 		err = tail.Close()
-		require.NoError(err, "Failed to close Tailer")
+		require.NoError(err, "Failed to close tailer.File")
 
 		n, err = tail.Read(make([]byte, 1))
 
@@ -44,8 +44,8 @@ func TestCanFollowFile(t *testing.T) {
 	assert := assert.New(t)
 
 	withTempFile(t, time.Millisecond*200, func(t *testing.T, filename string, file *os.File) error {
-		tail, err := tailer.NewTailer(filename)
-		require.NoError(err, "Failed to create Tailer")
+		tail, err := tailer.NewFile(filename)
+		require.NoError(err, "Failed to create tailer.File")
 
 		go func() {
 			for i := 0; i < 10; i++ {
@@ -70,8 +70,8 @@ func TestSpinningReader(t *testing.T) {
 	assert := assert.New(t)
 
 	withTempFile(t, time.Millisecond*150, func(t *testing.T, filename string, file *os.File) error {
-		tail, err := tailer.NewTailer(filename)
-		require.NoError(err, "Failed to create Tailer")
+		tail, err := tailer.NewFile(filename)
+		require.NoError(err, "Failed to create tailer.File")
 
 		// Touch the file repeatedly
 		go func() {

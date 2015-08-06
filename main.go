@@ -15,14 +15,14 @@ const (
 	pollIntervalSlow time.Duration = time.Millisecond * 150
 )
 
-// Tailer needs a description
+// File needs a description
 //
 // TODO: Abstract changes/fills/rotations from polling or event based. I.e. have
 // a rotate function that waits for a message on a rotateNow channel, have a
 // fill buffer function that just waits for messages on the fillBufferNOw
 // channel, etc. This way the choice of polling vs event based is handled
 // purely by the args  (probably have them) spin up a goroutine that feeds those channels
-type Tailer struct {
+type File struct {
 	filename string
 	file     *os.File
 	fileSize int64
@@ -35,9 +35,9 @@ type Tailer struct {
 	errc chan error
 }
 
-// NewTailer returns a new Tailer for the given file with the given Config
+// NewFile returns a new File for the given file with the given Config
 // options
-func NewTailer(filename string, opts ...TailerConfig) (*Tailer, error) {
+func NewFile(filename string, opts ...FileConfig) (*File, error) {
 	var (
 		path string
 		f    *os.File
@@ -57,7 +57,7 @@ func NewTailer(filename string, opts ...TailerConfig) (*Tailer, error) {
 		return nil, err
 	}
 
-	t := &Tailer{
+	t := &File{
 		filename: path,
 		file:     f,
 
@@ -92,7 +92,7 @@ func NewTailer(filename string, opts ...TailerConfig) (*Tailer, error) {
 // buffer to be flushed by Read after Close() is called and its current
 // behavior. However I have taken the conservative route and currently
 // EOF all post-close writes.
-func (t *Tailer) Read(b []byte) (int, error) {
+func (t *File) Read(b []byte) (int, error) {
 	// Don't return 0, nil
 	for t.ring.Readable == 0 && !t.closed {
 		time.Sleep(pollIntervalFast)
@@ -114,16 +114,16 @@ func (t *Tailer) Read(b []byte) (int, error) {
 
 // Close is the implementation of the io.Closer interface with implemenation
 //
-// This closes the Tailer, which currently prevents any further reads from the
+// This closes the File, which currently prevents any further reads from the
 // tailer.
-func (t *Tailer) Close() error {
+func (t *File) Close() error {
 	t.closed = true
 	return t.file.Close()
 }
 
 // Turn this into an example at some point XD
 // func main() {
-// 	t, err := NewTailer("/tmp/garbage")
+// 	t, err := NewFile("/tmp/garbage")
 // 	fmt.Println(t, err)
 // 	if err != nil {
 // 		return
