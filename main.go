@@ -73,8 +73,12 @@ func NewTailer(filename string, opts ...TailerConfig) (*Tailer, error) {
 		}
 	}
 
-	go t.pollForChanges()
-	go t.pollForRotations()
+	// Use polling or event based change detection / rotation
+	switch {
+	default:
+		go t.pollForChanges(pollIntervalFast)
+		go t.pollForRotations(pollIntervalSlow)
+	}
 
 	return t, nil
 }

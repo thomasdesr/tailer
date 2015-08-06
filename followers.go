@@ -18,19 +18,15 @@ func (t *Tailer) fill() error {
 	}
 }
 
-func (t *Tailer) pollForChanges() {
-	for {
-		if t.closed {
-			break
-		}
-
+func (t *Tailer) pollForChanges(d time.Duration) {
+	for !t.closed {
 		if err := t.fill(); err != nil {
 			if err = t.reopenFile(); err != nil {
 				t.errc <- err
 			}
 		}
 
-		time.Sleep(pollIntervalFast)
+		time.Sleep(d)
 	}
 }
 

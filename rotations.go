@@ -50,15 +50,14 @@ func (t *Tailer) checkForTruncate() bool {
 }
 
 // pollForRotations hits the filesystem every `pollIntervalSlow` looking to see if the file needs to be reopened
-func (t *Tailer) pollForRotations() {
+func (t *Tailer) pollForRotations(d time.Duration) {
 	previousFile, err := t.file.Stat()
 	if err != nil {
 		t.errc <- err
 	}
 
-	for {
+	for !t.closed {
 		currentFile, err := os.Stat(t.filename)
-
 		switch err {
 		case nil:
 			switch os.SameFile(currentFile, previousFile) {
@@ -79,9 +78,11 @@ func (t *Tailer) pollForRotations() {
 			// Filename doens't seem to be there, wait for it to re-appear
 		}
 
-		time.Sleep(pollIntervalSlow)
+		time.Sleep(d)
 	}
 }
+
+// func (t *Tailer) notifyForRotations()
 
 // func (t *Tailer) handleFileEvent(ev fsnotify.Event) fileAction {
 // 	switch {
