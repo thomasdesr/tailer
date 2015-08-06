@@ -77,7 +77,7 @@ func TestSpinningReader(t *testing.T) {
 		go func() {
 			for _ = range time.Tick(time.Millisecond * 5) {
 				t.Log("Touching the file")
-				assert.NoError(os.Chtimes(filename, time.Now(), time.Now()), "Unable to touch the file: '%v'", filename)
+				os.Chtimes(filename, time.Now(), time.Now())
 			}
 		}()
 
@@ -96,7 +96,7 @@ func TestSpinningReader(t *testing.T) {
 					t.Log("Read completed")
 					readCount++
 					if readCount > 5 {
-						require.Fail("Spinning on read")
+						assert.Fail("Spinning on read")
 					}
 				}
 			}

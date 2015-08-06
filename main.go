@@ -24,10 +24,9 @@ const (
 // purely by the args  (probably have them) spin up a goroutine that feeds those channels
 type Tailer struct {
 	filename string
-
-	fmu      sync.Mutex
 	file     *os.File
 	fileSize int64
+	fmu      sync.Mutex
 
 	ring *rbuf.FixedSizeRingBuf
 
