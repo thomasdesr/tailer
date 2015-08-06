@@ -16,6 +16,7 @@ const (
 )
 
 // Tailer needs a description
+//
 // TODO: Abstract changes/fills/rotations from polling or event based. I.e. have
 // a rotate function that waits for a message on a rotateNow channel, have a
 // fill buffer function that just waits for messages on the fillBufferNOw
