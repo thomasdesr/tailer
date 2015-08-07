@@ -125,8 +125,8 @@ func withTempFile(t *testing.T, timeout time.Duration, action func(t *testing.T,
 
 	select {
 	case err = <-errc:
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	case <-time.After(timeout):
-		require.FailNow(t, "test took too long :(")
+		assert.Fail(t, "test took too long :(")
 	}
 }
