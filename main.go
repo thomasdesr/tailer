@@ -75,6 +75,10 @@ func NewFile(filename string, opts ...FileConfig) (*File, error) {
 
 	// Use polling or event based change detection / rotation
 	switch {
+	// case false: // Don't do it, this is still broken :(
+	// 	if err := t.notifyOnChanges(); err != nil {
+	// 		return nil, err
+	// 	}
 	default:
 		go t.pollForChanges(pollIntervalFast)
 		go t.pollForRotations(pollIntervalSlow)
@@ -95,7 +99,7 @@ func NewFile(filename string, opts ...FileConfig) (*File, error) {
 func (t *File) Read(b []byte) (int, error) {
 	// Don't return 0, nil
 	for t.ring.Readable == 0 && !t.closed {
-		time.Sleep(pollIntervalFast)
+		time.Sleep(pollIntervalFast) // Maybe swap this out for a notification at some point, but tbh, this works
 	}
 
 	if t.closed == true {
@@ -105,7 +109,9 @@ func (t *File) Read(b []byte) (int, error) {
 	// Check for any waiting errors
 	select {
 	case err := <-t.errc:
-		return 0, err
+		if err != nil { // Just in case XD
+			return 0, err
+		}
 	default:
 	}
 
