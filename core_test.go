@@ -64,7 +64,7 @@ func TestCanFollowFile(t *testing.T) {
 }
 
 // Run for 50ms constantly trying to read from something that has nothing to read
-// This is here to make sure we don't let our Reader "spin" i.e. return (0, nil)
+// This is pretty much here to make sure we don't let our Reader "spin" i.e. return (0, nil)
 func TestSpinningReader(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
@@ -110,7 +110,7 @@ func TestSpinningReader(t *testing.T) {
 	})
 }
 
-// Note despite defering here, we still aren't quite cleaning up the files all the time :(
+// TODO: Despite defering here, we still aren't quite cleaning up the files all the time :(
 func withTempFile(t *testing.T, timeout time.Duration, action func(t *testing.T, filename string, file *os.File) error) {
 	dir, err := ioutil.TempDir(os.TempDir(), "tailer")
 	require.NoError(t, err, "couldn't create temp dir: '%v'", err)

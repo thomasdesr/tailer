@@ -18,8 +18,7 @@ func (t *File) pollForUpdates(d time.Duration) {
 	}
 }
 
-// pollForRotations hits the filesystem every interval looking to see if the
-// file at `filename` path is different from what it was previously
+// pollForRotations hits the filesystem every interval looking to see if the file at `filename` path is different from what it was previously
 func (t *File) pollForRotations(d time.Duration) {
 	previousFile, err := t.file.Stat()
 	if err != nil {
@@ -44,8 +43,7 @@ func (t *File) pollForRotations(d time.Duration) {
 				}
 			}
 		default:
-			// Filename doens't seem to be there (or something else weird),
-			// wait for it to re-appear
+			// Filename doens't seem to be there (or something else weird), wait for it to re-appear
 		}
 
 		time.Sleep(d)

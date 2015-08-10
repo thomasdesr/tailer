@@ -11,10 +11,8 @@ import (
 	"github.com/thomaso-mirodin/tailer"
 )
 
-// This test simply checks to make sure that we still work following a file rotaiton
-// to what it does is writes out 100 bytes, and rotates the file half way through.
-// The success condition for this test is just getting back more than 50 bytes, because
-// that means we got past the rotation
+// This test simply checks to make sure that we still work following a file rotaiton to what it does is writes out 100 bytes, and rotates the file half way through.
+//The success condition for this test is just getting back more than 50 bytes, because that means we got past the rotation
 func TestRmTouch(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)

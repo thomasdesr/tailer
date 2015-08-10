@@ -17,20 +17,13 @@ const (
 
 // File needs a description
 //
-// TODO: (Mayyyybe) Abstract changes/fills/rotations from polling or event
-// based. I.e. have a rotate function that waits for a message on a rotateNow
-// channel, have a fill buffer function that just waits for messages on the
-// fillBufferNOw channel, etc. This way the choice of polling vs event based
-// is handled purely by the args  (probably have them) spin up a goroutine
-// that feeds those channels
+// TODO: (Mayyyybe) Abstract changes/fills/rotations from polling or event based. I.e. have a rotate function that waits for a message on a rotateNow channel, have a fill buffer function that just waits for messages on the fillBufferNOw channel, etc. This way the choice of polling vs event based is handled purely by the args  (probably have them) spin up a goroutine that feeds those channels
 //
-// TODO: Have fill() read from a io.MultiReader instead of directly from the
-// file, when a rotation is detected, create a new io.MultiReader from the
-// old io.Reader and the new file. So something like this:
-//		io.NewMultiReader(t.reader, t.file)
-// Where @ start time t.reader starts out as the file, but upon the first
-// rotation is swapped out for a io.MultiReader which includes the old file
-// and a the new file.
+// TODO: Have fill() read from a io.MultiReader instead of directly from the file, when a rotation is detected, create a new io.MultiReader from the old io.Reader and the new file. So something like this:
+//
+//		t.reader = io.NewMultiReader(t.reader, t.file)
+//
+// Where @ start time t.reader starts out as the file, but upon the first rotation is swapped out for a io.MultiReader which includes the old file and a the new file.
 type File struct {
 	filename string
 	file     *os.File
@@ -46,8 +39,7 @@ type File struct {
 	errc chan error
 }
 
-// NewFile returns a new File for the given file with the given Config
-// options
+// NewFile returns a new File for the given file with the given Config options
 func NewFile(filename string, opts ...FileConfig) (*File, error) {
 	var (
 		path string
@@ -97,15 +89,11 @@ func NewFile(filename string, opts ...FileConfig) (*File, error) {
 	return t, nil
 }
 
-// Read is the implementation of the io.Reader interface below are the
-// implemenation details
+// Read is the implementation of the io.Reader interface below are the implemenation details
 //
 // Read will return (0, io.EOF) to any call after the Reader is closed.
 //
-// Future Note: This is not set in stone, I am torn between allowing the
-// current buffer to be flushed by Read after Close() is called and its current
-// behavior. However I have taken the conservative route and currently EOF all
-// post-close writes.
+// Future Note: This is not set in stone, I am torn between allowing the current buffer to be flushed by Read after Close() is called and its current behavior. However I have taken the conservative route and currently EOF all post-close writes.
 func (t *File) Read(b []byte) (int, error) {
 	// Don't return 0, nil
 	for t.ring.Readable == 0 && !t.closed {
@@ -130,16 +118,13 @@ func (t *File) Read(b []byte) (int, error) {
 
 // Close is the implementation of the io.Closer interface with implemenation
 //
-// This closes the File, which currently prevents any further reads from the
-// tailer.
+// This closes the File, which currently prevents any further reads from the tailer.
 func (t *File) Close() error {
 	t.closed = true
 	return t.file.Close()
 }
 
-// Read as much data is available in the file into the ring buffer ignoring
-// short writes (buffer is full), and EOFs (no more data to read from the disk)
-// as they are expected
+// Read as much data is available in the file into the ring buffer ignoring short writes (buffer is full), and EOFs (no more data to read from the disk) as they are expected
 func (t *File) fill() error {
 	t.fmu.Lock()
 	_, err := io.Copy(t.ring, t.file)
@@ -177,7 +162,6 @@ func (t *File) reopenFile() error {
 
 // checkForTruncate stats the filename to see if the file has shrunk and therefore been truncated
 // This isn't expected to handle IO errors, simply return True if the file has been truncated. (IO Errors may interfere with this happening)
-// It also doesn't update the current size of the file (i.e. t.fileSize)
 func (t *File) checkForTruncate() bool {
 	s, err := os.Stat(t.filename)
 	if os.IsNotExist(err) {
