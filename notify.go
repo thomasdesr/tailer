@@ -2,7 +2,9 @@ package tailer
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
+	"time"
 
 	"gopkg.in/fsnotify.v1"
 )
@@ -14,20 +16,36 @@ func (t *File) notifyOnChanges() error {
 	}
 
 	if err := w.Add(filepath.Dir(t.filename)); err != nil {
-		// If we can't watch the directory, we'll have to die for the moment.
-		return err
-		// Eventually I would like to switch into polling the file to catch rotations with a watch on the file itself
-		// to prevent us from having to poll for new data as well. The problem is currently we have no way of knowing
-		// if the file has been rotated outside of pollForChanges. Once that is done we can make this more seamless
-		//
-		// rotations := make(chan struct{}) //t.pollForRotations(pollIntervalSlow)
-		// go func() {
-		// 	for range rotations {
-		// 		if err := w.Add(t.filename); err != nil {
-		// 			t.errc <- err
-		// 		}
-		// 	}
-		// }()
+		// If we can't watch the directory, we'll have to watch the file directly
+		if err := w.Add(t.filename); err != nil {
+			return err
+		}
+
+		// The problem is that now that we're whatching the file itself and not the directory it sits in, so filename changes don't get picked up. This means we have to poll the file path to detect when the file has rotated so we can re-watch the file.
+		oldFile, err := t.file.Stat()
+		if err != nil {
+			return err
+		}
+		go func() {
+			for !t.closed {
+				newFile, err := os.Stat(t.filename)
+				switch err {
+				case nil:
+					if !os.SameFile(oldFile, newFile) {
+						if err := w.Add(t.filename); err != nil {
+							t.errc <- err
+						}
+						if err := t.reopenFile(); err != nil {
+							t.errc <- err
+						}
+						oldFile = newFile
+					}
+				default:
+					// File missing, do nothing!
+				}
+				time.Sleep(pollIntervalSlow)
+			}
+		}()
 	}
 
 	go func(w *fsnotify.Watcher) {

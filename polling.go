@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// pollForChanges just sits here and tries to refill the buffer every interval
-func (t *File) pollForChanges(d time.Duration) {
+// pollForUpdates just sits here and tries to refill the buffer every interval
+func (t *File) pollForUpdates(d time.Duration) {
 	for !t.closed {
 		if err := t.fill(); err != nil {
 			if err = t.reopenFile(); err != nil {

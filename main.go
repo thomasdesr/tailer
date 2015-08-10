@@ -37,6 +37,8 @@ type File struct {
 	fileSize int64
 	fmu      sync.Mutex
 
+	rotationStrat string // Omghacky, get rid of me :(
+
 	ring *rbuf.FixedSizeRingBuf
 
 	closed bool
@@ -82,14 +84,13 @@ func NewFile(filename string, opts ...FileConfig) (*File, error) {
 		}
 	}
 
-	// Use polling or event based change detection / rotation
-	switch {
-	// case false: // Don't do it, this is still broken :(
-	// 	if err := t.notifyOnChanges(); err != nil {
-	// 		return nil, err
-	// 	}
+	switch t.rotationStrat {
+	case "notify":
+		if err := t.notifyOnChanges(); err != nil {
+			return nil, err
+		}
 	default:
-		go t.pollForChanges(pollIntervalFast)
+		go t.pollForUpdates(pollIntervalFast)
 		go t.pollForRotations(pollIntervalSlow)
 	}
 
