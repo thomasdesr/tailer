@@ -1,6 +1,10 @@
 package tailer
 
-import "os"
+import (
+	"os"
+
+	"github.com/glycerine/rbuf"
+)
 
 // FileConfig lets you change the tailer.File, their primary use is as arguments to the tailer.File constructor, although they could be used later
 type FileConfig func(*File) error
@@ -9,6 +13,13 @@ type FileConfig func(*File) error
 func ReadFromStart(t *File) error {
 	_, err := t.file.Seek(0, os.SEEK_SET)
 	return err
+}
+
+func SetBufferSize(i int) FileConfig {
+	return func(t *File) error {
+		t.ring = rbuf.NewFixedSizeRingBuf(i)
+		return nil
+	}
 }
 
 // PollForChanges will cause tailer to poll the file every `pollIntervalFast` for writes and `pollIntervalSlow` for rotations.
