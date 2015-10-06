@@ -15,15 +15,15 @@ const (
 	pollIntervalSlow time.Duration = time.Millisecond * 150
 )
 
-// File needs a description
-//
-// TODO: (Mayyyybe) Abstract changes/fills/rotations from polling or event based. I.e. have a rotate function that waits for a message on a rotateNow channel, have a fill buffer function that just waits for messages on the fillBufferNOw channel, etc. This way the choice of polling vs event based is handled purely by the args  (probably have them) spin up a goroutine that feeds those channels
+// TODO: (Mayyyybe) Abstract changes/fills/rotations from polling or event based. I.e. have a rotate function that waits for a message on a rotateNow channel, have a fill buffer function that just waits for messages on the fillBufferNow channel, etc. This way the way the logic around filling of buffers is abstracted away from the choice of which strategy to use (polling vs inotify).
 //
 // TODO: Have fill() read from a io.MultiReader instead of directly from the file, when a rotation is detected, create a new io.MultiReader from the old io.Reader and the new file. So something like this:
 //
 //		t.reader = io.NewMultiReader(t.reader, t.file)
 //
 // Where @ start time t.reader starts out as the file, but upon the first rotation is swapped out for a io.MultiReader which includes the old file and a the new file.
+
+// File is the container for all the logic around tailing a single file
 type File struct {
 	filename string
 	file     *os.File
