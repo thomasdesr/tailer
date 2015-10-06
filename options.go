@@ -25,12 +25,12 @@ func SetBufferSize(i int) FileConfig {
 	}
 }
 
-// PollForChanges will cause tailer to poll the file every tailer.pollIntervalFast for writes and tailer.pollIntervalSlow for rotations.
+// PollForChanges will cause tailer to poll the file every PollIntervalFast for writes and PollIntervalSlow for rotations.
 func PollForChanges() FileConfig {
 	return func(t *File) error {
 		t.rotationStrat = "polling"
-		// go t.pollForUpdates(pollIntervalFast)
-		// go t.pollForRotations(pollIntervalSlow)
+		// go t.pollForUpdates(PollIntervalFast)
+		// go t.pollForRotations(PollIntervalSlow)
 		return nil
 	}
 }

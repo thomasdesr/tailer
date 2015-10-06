@@ -43,7 +43,7 @@ func (t *File) notifyOnChanges() error {
 				default:
 					// File missing, do nothing!
 				}
-				time.Sleep(pollIntervalSlow)
+				time.Sleep(PollIntervalSlow)
 			}
 		}()
 	}

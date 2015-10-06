@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	pollIntervalFast time.Duration = time.Millisecond * 15
-	pollIntervalSlow time.Duration = time.Millisecond * 150
+	PollIntervalFast time.Duration = time.Millisecond * 15
+	PollIntervalSlow time.Duration = time.Millisecond * 150
 )
 
 // TODO: (Mayyyybe) Abstract changes/fills/rotations from polling or event based. I.e. have a rotate function that waits for a message on a rotateNow channel, have a fill buffer function that just waits for messages on the fillBufferNow channel, etc. This way the way the logic around filling of buffers is abstracted away from the choice of which strategy to use (polling vs inotify).
@@ -82,8 +82,8 @@ func NewFile(filename string, opts ...FileConfig) (*File, error) {
 			return nil, err
 		}
 	default:
-		go t.pollForUpdates(pollIntervalFast)
-		go t.pollForRotations(pollIntervalSlow)
+		go t.pollForUpdates(PollIntervalFast)
+		go t.pollForRotations(PollIntervalSlow)
 	}
 
 	return t, nil
@@ -97,7 +97,7 @@ func NewFile(filename string, opts ...FileConfig) (*File, error) {
 func (t *File) Read(b []byte) (int, error) {
 	// Don't return 0, nil
 	for t.ring.Readable == 0 && !t.closed {
-		time.Sleep(pollIntervalFast) // Maybe swap this out for a notification at some point, but tbh, this works
+		time.Sleep(PollIntervalFast) // Maybe swap this out for a notification at some point, but tbh, this works
 	}
 
 	if t.closed == true {
