@@ -95,7 +95,7 @@ func (t *File) handleFileEvent(ev fsnotify.Event) error {
 		// Modified time on the file changed, noop
 		return nil
 	default:
-		panic(fmt.Sprintf("recieved unknown fsnotify event: %#v", ev))
+		panic(fmt.Sprintf("received unknown fsnotify event: %#v", ev))
 	}
 }
 
